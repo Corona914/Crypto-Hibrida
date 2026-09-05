@@ -80,7 +80,7 @@ def index():
                 with open("mensaje_salida.txt", "w") as f:
                     f.write(output_content)
 
-                success_msg = "¡Archivos listos para enviar por WhatsApp!\n1. mensaje_salida.txt\n2. parametros_aes.txt"
+                success_msg = "¡Archivos listos!\n1. mensaje_salida.txt\n2. parametros_aes.txt"
 
             # ==============================================
             # ACCIÓN: BETITO (Leer archivos y descifrar)

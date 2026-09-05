@@ -1,0 +1,136 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Criptografía Híbrida</title>
+    <script src="https://cdn.tailwindcss.com"></script>
+</head>
+<body class="bg-slate-100 min-h-screen p-8 font-sans">
+    <div class="max-w-6xl mx-auto bg-white p-8 rounded-xl shadow-lg border border-slate-200">
+        <h1 class="text-3xl font-bold text-slate-800 text-center mb-2">Práctica: Criptografía Híbrida</h1>
+        <p class="text-center text-slate-500 mb-8 font-mono text-sm">Equipo ZimmermannCCG</p>
+
+        {% if error %}
+        <div class="bg-red-100 border border-red-400 text-red-700 px-4 py-3 rounded relative mb-6">
+            <strong class="font-bold">Error:</strong> <span class="block sm:inline">{{ error }}</span>
+        </div>
+        {% endif %}
+        
+        {% if success_msg %}
+        <div class="bg-blue-100 border border-blue-400 text-blue-700 px-4 py-3 rounded relative mb-6">
+            <strong class="font-bold">¡Éxito!</strong> <span class="block sm:inline whitespace-pre-line">{{ success_msg }}</span>
+        </div>
+        {% endif %}
+
+        <form method="POST" enctype="multipart/form-data" class="grid grid-cols-1 md:grid-cols-2 gap-8">
+            
+            <!-- ALICIA (EMISOR) -->
+            <div class="bg-blue-50 p-6 rounded-lg border border-blue-200 shadow-sm relative overflow-hidden">
+                <div class="absolute top-0 right-0 bg-blue-200 text-blue-800 text-xs font-bold px-3 py-1 rounded-bl-lg">Generación de Archivos</div>
+                <h2 class="text-xl font-semibold text-blue-800 mb-4 border-b border-blue-200 pb-2 mt-2"> Emisor</h2>
+                
+                <div class="mb-4 bg-white p-4 rounded border">
+                    <label class="block text-sm font-bold text-slate-800 mb-2">1. ¿Qué deseas enviar?</label>
+                    <textarea name="message" rows="2" class="w-full p-2 border rounded-md mb-2 text-sm" placeholder="Escribe un mensaje aquí..."></textarea>
+                    <input type="file" name="file_to_encrypt" class="w-full text-sm text-slate-500 file:mr-4 file:py-1 file:px-2 file:rounded file:border-0 file:text-xs file:bg-blue-50 file:text-blue-700">
+                </div>
+
+                <div class="mb-4 bg-white p-4 rounded border">
+                    <label class="block text-sm font-bold text-slate-800 mb-2">2. Servicios a aplicar</label>
+                    <div class="flex items-center mb-3 border-b pb-2">
+                        <input type="checkbox" name="apply_encryption" id="apply_encryption" class="mr-2 h-4 w-4" checked readonly onclick="return false;">
+                        <label for="apply_encryption" class="text-sm font-semibold">Cifrado de Datos (AES-CBC)</label>
+                    </div>
+                    <div class="flex items-start">
+                        <input type="checkbox" name="apply_signature" id="apply_signature" class="mr-2 mt-1 h-4 w-4">
+                        <div class="w-full">
+                            <label for="apply_signature" class="text-sm font-semibold block mb-1">Añadir Firma Digital (RSA)</label>
+                            <input type="file" name="alice_priv_key" accept=".txt" class="w-full text-xs text-slate-500 file:mr-2 file:py-1 file:px-2 file:rounded file:border-0 file:bg-red-50 file:text-red-700">
+                        </div>
+                    </div>
+                </div>
+
+                <button type="submit" name="action" value="alicia_process" class="w-full bg-blue-600 hover:bg-blue-700 text-white font-bold py-3 px-4 rounded transition shadow-md">
+                    Cifrar y Exportar Archivos
+                </button>
+                <p class="text-[10px] text-center text-slate-500 mt-2">Se generarán <b>mensaje_salida.txt</b> y <b>parametros_aes.txt</b></p>
+            </div>
+
+            <!-- BETITO (RECEPTOR) -->
+            <div class="bg-green-50 p-6 rounded-lg border border-green-200 shadow-sm relative overflow-hidden">
+                <div class="absolute top-0 right-0 bg-green-200 text-green-800 text-xs font-bold px-3 py-1 rounded-bl-lg">Lectura de Archivos</div>
+                <h2 class="text-xl font-semibold text-green-800 mb-4 border-b border-green-200 pb-2 mt-2"> Receptor</h2>
+                
+                <div class="mb-4 bg-white p-4 rounded border space-y-3">
+                    <label class="block text-sm font-bold text-slate-800 mb-1">Archivos Recibidos</label>
+                    
+                    <div>
+                        <p class="text-xs text-slate-500 font-semibold mb-1">1. Sube el paquete recibido (mensaje_salida.txt)</p>
+                        <input type="file" name="archivo_recibido" accept=".txt" class="w-full text-sm text-slate-500 file:mr-4 file:py-1 file:px-2 file:rounded file:border-0 file:text-xs file:bg-green-50 file:text-green-700">
+                    </div>
+
+                    <div class="border-t pt-2">
+                        <p class="text-xs text-slate-500 font-semibold mb-1">2. Sube las llaves AES (parametros_aes.txt)</p>
+                        <input type="file" name="archivo_parametros" accept=".txt" class="w-full text-sm text-slate-500 file:mr-4 file:py-1 file:px-2 file:rounded file:border-0 file:text-xs file:bg-green-50 file:text-green-700">
+                    </div>
+
+                    <div class="border-t pt-2">
+                        <p class="text-xs text-slate-500 font-semibold mb-1">3. Llave Pública de Alicia (.txt) [Opcional]</p>
+                        <input type="file" name="friend_pub_key" accept=".txt" class="w-full text-sm text-slate-500 file:mr-4 file:py-1 file:px-2 file:rounded file:border-0 file:text-xs file:bg-green-50 file:text-green-700">
+                    </div>
+                </div>
+
+                <button type="submit" name="action" value="betito_process" class="w-full bg-green-600 hover:bg-green-700 text-white font-bold py-3 px-4 rounded transition shadow-md">
+                    Descifrar / Verificar Archivo
+                </button>
+
+                {% if results %}
+                    <div class="mt-6 p-4 bg-white border-2 border-green-300 rounded-lg shadow-inner">
+                        <h3 class="font-bold text-green-800 mb-3 border-b pb-1">Resultados de la Recepción:</h3>
+                        
+                        <div class="space-y-3 text-sm mb-4">
+                            {% if results.ciphertext_status %}
+                            <div class="flex items-center bg-slate-50 p-2 rounded border">
+                                <span class="mr-2 text-lg">🔓</span> 
+                                <div>
+                                    <p class="font-semibold text-slate-700">Descifrado AES:</p>
+                                    <p class="text-green-600 font-bold">{{ results.ciphertext_status }}</p>
+                                </div>
+                            </div>
+                            {% endif %}
+                            
+                            {% if results.signature_status %}
+                            <div class="flex items-center bg-slate-50 p-2 rounded border">
+                                <span class="mr-2 text-lg">✍️</span> 
+                                <div>
+                                    <p class="font-semibold text-slate-700">Verificación de Firma:</p>
+                                    <p class="font-bold {{ 'text-green-600' if 'Válida' in results.signature_status else 'text-red-600' }}">
+                                        {{ results.signature_status }}
+                                    </p>
+                                </div>
+                            </div>
+                            {% endif %}
+                        </div>
+
+                        <div>
+                            <span class="text-sm font-bold text-slate-700">Contenido Recuperado:</span>
+                            <div class="mt-1 p-3 bg-slate-800 text-green-400 font-mono text-xs rounded overflow-auto max-h-40 break-words">
+                                {{ results.decrypted_preview }}
+                            </div>
+                            
+                            {% if results.download_b64 %}
+                            <div class="mt-4 pt-3 border-t border-slate-600">
+                                <a href="data:application/octet-stream;base64,{{ results.download_b64 }}" download="archivo_recuperado{{ results.download_ext }}" class="inline-flex items-center bg-green-500 hover:bg-green-600 text-white font-bold py-2 px-4 rounded transition shadow-sm">
+                                    ⬇️ Descargar Archivo Completo
+                                </a>
+                            </div>
+                            {% endif %}
+                        </div>
+                    </div>
+                {% endif %}
+            </div>
+        </form>
+    </div>
+</body>
+</html>
